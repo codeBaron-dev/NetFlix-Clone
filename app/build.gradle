@@ -95,4 +95,7 @@ dependencies {
     //constraint layout
     implementation "androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha03"
     implementation "androidx.compose.material:material-icons-extended:$compose_version"
+
+    //corotine
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1"
 }

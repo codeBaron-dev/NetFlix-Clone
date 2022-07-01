@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.codebaron.filmworld.screens.OptionScreen
 import com.codebaron.filmworld.screens.SplashScreen
 
 @Composable
@@ -14,9 +15,11 @@ fun IntroStageNavigationController() {
         startDestination = Destinations.SPLASH_SCREEN.name
     ) {
         composable(Destinations.SPLASH_SCREEN.name) {
-            SplashScreen()
+            SplashScreen(navigationController)
         }
-        composable(Destinations.OPTION_SCREEN.name) {}
+        composable(Destinations.OPTION_SCREEN.name) {
+            OptionScreen(navigationController)
+        }
     }
 }
 
