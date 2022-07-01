@@ -35,9 +35,10 @@ import com.codebaron.filmworld.utils.VIEWER
 
 @Composable
 fun OptionScreen(navigationController: NavHostController) {
-    Scaffold {
+    Scaffold(
+        topBar = { HeaderView() }
+    ) {
         Column {
-            HeaderView()
             BodyView(navigationController)
         }
     }
@@ -45,38 +46,48 @@ fun OptionScreen(navigationController: NavHostController) {
 
 @Composable
 fun HeaderView() {
-    Box(
-        modifier = Modifier
-            .height(40.dp)
-            .fillMaxWidth()
-            .background(color = Color.Black),
-        contentAlignment = Alignment.TopCenter
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(150.dp),
-                painter = painterResource(id = R.drawable.net),
-                contentDescription = null,
-                contentScale = ContentScale.FillWidth
-            )
-        }
+    Column {
         Box(
             modifier = Modifier
+                .height(30.dp)
                 .fillMaxWidth()
-                .padding(8.dp),
-            contentAlignment = Alignment.TopEnd
+                .background(color = Color.Black),
+            contentAlignment = Alignment.TopCenter
+        ) {}
+
+        Box(
+            modifier = Modifier
+                .height(40.dp)
+                .fillMaxWidth()
+                .background(color = Color.Black),
+            contentAlignment = Alignment.TopCenter
         ) {
-            Icon(
-                imageVector = Icons.Filled.Edit,
-                contentDescription = null,
-                tint = Color.White
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(150.dp),
+                    painter = painterResource(id = R.drawable.net),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillWidth
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                contentAlignment = Alignment.TopEnd
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Edit,
+                    contentDescription = null,
+                    tint = Color.White
+                )
+            }
         }
     }
 }
@@ -108,8 +119,8 @@ fun BodyView(navigationController: NavHostController) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Image(
                         modifier = Modifier
-                            .width(120.dp)
-                            .height(120.dp)
+                            .width(100.dp)
+                            .height(100.dp)
                             .clip(RoundedCornerShape(5.dp))
                             .clickable {
                                 navigationController.navigate(Destinations.MOVIES_HOME_SCREEN.name)
@@ -131,8 +142,8 @@ fun BodyView(navigationController: NavHostController) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Image(
                         modifier = Modifier
-                            .width(120.dp)
-                            .height(120.dp)
+                            .width(100.dp)
+                            .height(100.dp)
                             .clip(RoundedCornerShape(5.dp)),
                         painter = painterResource(id = R.drawable.dummyimage),
                         contentDescription = null,
@@ -157,8 +168,8 @@ fun BodyView(navigationController: NavHostController) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Image(
                         modifier = Modifier
-                            .width(120.dp)
-                            .height(120.dp)
+                            .width(100.dp)
+                            .height(100.dp)
                             .clip(RoundedCornerShape(5.dp)),
                         painter = painterResource(id = R.drawable.anime),
                         contentDescription = null,
@@ -177,8 +188,8 @@ fun BodyView(navigationController: NavHostController) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Column(
                         modifier = Modifier
-                            .width(120.dp)
-                            .height(120.dp),
+                            .width(100.dp)
+                            .height(100.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
