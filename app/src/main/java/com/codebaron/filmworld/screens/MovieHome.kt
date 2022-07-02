@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package com.codebaron.filmworld.screens
 
 import androidx.compose.foundation.*
@@ -7,13 +9,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,17 +30,162 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.codebaron.filmworld.R
 import com.codebaron.filmworld.models.Result
 import com.codebaron.filmworld.models.trendingResultDummy
 import com.codebaron.filmworld.utils.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Preview(showBackground = true)
 @Composable
 fun HomeScreen() {
-    Scaffold {
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState =
+        BottomSheetState(BottomSheetValue.Collapsed)
+    )
+    val coroutineScope = rememberCoroutineScope()
+
+    BottomSheetScaffold(
+        scaffoldState = bottomSheetScaffoldState,
+        sheetContent = {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+                    .background(color = Color.DarkGray)
+            ) {
+                Column(
+                    Modifier.fillMaxSize().padding(8.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Row {
+                        Image(
+                            modifier = Modifier
+                                .width(120.dp)
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(5.dp)),
+                            painter = rememberAsyncImagePainter(
+                                ImageRequest.Builder(LocalContext.current)
+                                    .data(data = "")
+                                    .apply(block = fun ImageRequest.Builder.() {
+                                        placeholder(R.drawable.dummyimage)
+                                        error(R.drawable.anime)
+                                    }).build()
+                            ),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop
+                        )
+
+                        Column(
+                            Modifier.padding(8.dp)
+                        ) {
+                            Text(
+                                text = "selectedVideo.original_title",
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Justify,
+                                maxLines = 2,
+                                color = Color.White,
+                                fontSize = 25.sp
+                            )
+                            Text(
+                                text = "selectedVideo.release_date",
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Light,
+                                textAlign = TextAlign.Justify,
+                                maxLines = 1,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "selectedVideo.overview",
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Justify,
+                                maxLines = 4,
+                                color = Color.White
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PlayCircle,
+                            contentDescription = ADD_IMAGE_DESCRIPTION,
+                            tint = Color.White
+                        )
+                        Icon(
+                            imageVector = Icons.Default.DownloadForOffline,
+                            contentDescription = null,
+                            tint = Color.White
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = Color.White
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = null,
+                            tint = Color.White
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .height(4.dp)
+                            .background(color = Color.White)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(color = Color.DarkGray),
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                                Text(
+                                    text = EPISODES_INFO,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Light,
+                                    textAlign = TextAlign.Justify,
+                                    maxLines = 1,
+                                    color = Color.White
+                                )
+                            }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        sheetPeekHeight = 0.dp
+    ) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -48,13 +194,16 @@ fun HomeScreen() {
                 .background(color = Color.Black)
         ) {
             Column {
-                MovieHeaderView(properties = trendingResultDummy)
+                MovieHeaderView(
+                    properties = trendingResultDummy,
+                    coroutineScope,
+                    bottomSheetScaffoldState
+                )
             }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
 fun HeaderBar() {
     BoxWithConstraints(
@@ -159,7 +308,11 @@ fun HeaderBar() {
 }
 
 @Composable
-fun MovieHeaderView(properties: List<Result>) {
+fun MovieHeaderView(
+    properties: List<Result>,
+    coroutineScope: CoroutineScope,
+    bottomSheetScaffoldState: BottomSheetScaffoldState
+) {
 
     val getRandomVideoObject = properties.random()
 
@@ -193,7 +346,7 @@ fun MovieHeaderView(properties: List<Result>) {
                         },
                     painter = rememberAsyncImagePainter(
                         ImageRequest.Builder(LocalContext.current)
-                            .data(data = "$IMAGE_PATH_URL/${getRandomVideoObject.poster_path.random()}")
+                            .data(data = "$IMAGE_PATH_URL/${getRandomVideoObject.poster_path}")
                             .apply(block = fun ImageRequest.Builder.() {
                                 placeholder(R.drawable.dummyimage)
                                 error(R.drawable.anime)
@@ -299,7 +452,7 @@ fun MovieHeaderView(properties: List<Result>) {
             }
         }
         Spacer(modifier = Modifier.size(10.dp))
-        ContinueWatchingList(trendingResultDummy)
+        ContinueWatchingList(trendingResultDummy, coroutineScope, bottomSheetScaffoldState)
         Spacer(modifier = Modifier.size(1.dp))
         TrendingNowList(trendingResultDummy)
         Spacer(modifier = Modifier.size(1.dp))
@@ -308,7 +461,11 @@ fun MovieHeaderView(properties: List<Result>) {
 }
 
 @Composable
-fun ContinueWatchingList(videos: List<Result>) {
+fun ContinueWatchingList(
+    videos: List<Result>,
+    coroutineScope: CoroutineScope,
+    bottomSheetScaffoldState: BottomSheetScaffoldState
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -363,7 +520,17 @@ fun ContinueWatchingList(videos: List<Result>) {
                                     imageVector = Icons.Outlined.PlayCircle,
                                     contentDescription = PLAY,
                                     tint = Color.White,
-                                    modifier = Modifier.size(70.dp)
+                                    modifier = Modifier
+                                        .size(70.dp)
+                                        .clickable {
+                                            coroutineScope.launch {
+                                                if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
+                                                    bottomSheetScaffoldState.bottomSheetState.expand()
+                                                } else {
+                                                    bottomSheetScaffoldState.bottomSheetState.collapse()
+                                                }
+                                            }
+                                        }
                                 )
                             }
                             Column(
@@ -409,7 +576,8 @@ fun ContinueWatchingList(videos: List<Result>) {
                                         Icon(
                                             imageVector = Icons.Outlined.Info,
                                             contentDescription = INFO,
-                                            tint = Color.White
+                                            tint = Color.White,
+                                            modifier = Modifier.clickable { }
                                         )
                                         Spacer(modifier = Modifier.size(45.dp))
                                         Icon(

@@ -15,6 +15,7 @@ const val MORE_OPTION = "More"
 const val TRENDING_NOW = "Trending Now"
 const val SEARCH = "Search"
 const val TOP_RATED = "Top Rated"
+const val EPISODES_INFO = "Episode & Info"
 
 
 //
