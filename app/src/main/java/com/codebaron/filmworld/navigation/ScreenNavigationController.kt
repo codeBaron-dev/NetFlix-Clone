@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.codebaron.filmworld.screens.HomeScreen
 import com.codebaron.filmworld.screens.OptionScreen
 import com.codebaron.filmworld.screens.SplashScreen
 
@@ -20,16 +21,8 @@ fun IntroStageNavigationController() {
         composable(Destinations.OPTION_SCREEN.name) {
             OptionScreen(navigationController)
         }
-    }
-}
-
-@Composable
-fun BottomNavigationStageController() {
-    val navigationController = rememberNavController()
-    NavHost(
-        navController = navigationController,
-        startDestination = Destinations.MOVIES_HOME_SCREEN.name
-    ) {
-        composable(Destinations.MOVIES_HOME_SCREEN.name) {}
+        composable(Destinations.MOVIES_HOME_SCREEN.name) {
+            HomeScreen()
+        }
     }
 }
