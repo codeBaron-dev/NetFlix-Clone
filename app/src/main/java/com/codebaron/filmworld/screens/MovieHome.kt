@@ -14,6 +14,8 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,18 +33,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.codebaron.filmworld.R
 import com.codebaron.filmworld.models.Result
 import com.codebaron.filmworld.models.trendingResultDummy
+import com.codebaron.filmworld.repository.FilmsViewModel
 import com.codebaron.filmworld.utils.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Preview(showBackground = true)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(filmsViewModel: FilmsViewModel = hiltViewModel()) {
+    val popularFilms by filmsViewModel.getPopularFilms(API_KEY, "en-US", "1")
+        .observeAsState(emptyList())
+    val trendingFilms by filmsViewModel.getTrendingFilms(API_KEY).observeAsState(emptyList())
+    val topRatedFilms by filmsViewModel.getTopRatedFilms(API_KEY, "en-US", "1")
+        .observeAsState(emptyList())
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState =
         BottomSheetState(BottomSheetValue.Collapsed)
@@ -59,7 +68,9 @@ fun HomeScreen() {
                     .background(color = Color.DarkGray)
             ) {
                 Column(
-                    Modifier.fillMaxSize().padding(8.dp),
+                    Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
                     Row {
@@ -194,8 +205,13 @@ fun HomeScreen() {
                 .background(color = Color.Black)
         ) {
             Column {
+                val popularFilmContent = popularFilms.ifEmpty { trendingResultDummy }
+                val trendingFilmContent = trendingFilms.ifEmpty { trendingResultDummy }
+                val topRatedFilmContent = topRatedFilms.ifEmpty { trendingResultDummy }
                 MovieHeaderView(
-                    properties = trendingResultDummy,
+                    popularFilmsList = popularFilmContent,
+                    trendingFilmsList = trendingFilmContent,
+                    topRatedFilmsList = topRatedFilmContent,
                     coroutineScope,
                     bottomSheetScaffoldState
                 )
@@ -309,12 +325,14 @@ fun HeaderBar() {
 
 @Composable
 fun MovieHeaderView(
-    properties: List<Result>,
+    popularFilmsList: List<Result>,
+    trendingFilmsList: List<Result>,
+    topRatedFilmsList: List<Result>,
     coroutineScope: CoroutineScope,
     bottomSheetScaffoldState: BottomSheetScaffoldState
 ) {
 
-    val getRandomVideoObject = properties.random()
+    val getRandomVideoObject = popularFilmsList.random()
 
     Column(
         modifier = Modifier
@@ -375,14 +393,16 @@ fun MovieHeaderView(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = getRandomVideoObject.original_title,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Justify,
-                                maxLines = 1,
-                                color = Color.White
-                            )
+                            getRandomVideoObject.original_title?.let {
+                                Text(
+                                    text = it,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Justify,
+                                    maxLines = 1,
+                                    color = Color.White
+                                )
+                            }
                         }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -452,11 +472,11 @@ fun MovieHeaderView(
             }
         }
         Spacer(modifier = Modifier.size(10.dp))
-        ContinueWatchingList(trendingResultDummy, coroutineScope, bottomSheetScaffoldState)
+        ContinueWatchingList(popularFilmsList, coroutineScope, bottomSheetScaffoldState)
         Spacer(modifier = Modifier.size(1.dp))
-        TrendingNowList(trendingResultDummy)
+        TrendingNowList(trendingFilmsList)
         Spacer(modifier = Modifier.size(1.dp))
-        TopRated(trendingResultDummy)
+        TopRated(topRatedFilmsList)
     }
 }
 

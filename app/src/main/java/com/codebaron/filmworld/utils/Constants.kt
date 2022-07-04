@@ -41,5 +41,10 @@ val NAVIGATION_OBJECTS = listOf(
     Downloads
 )
 
-const val BASE_URL = "http://image.tmdb.org/t/p/"
+const val IMAGE_BASE_URL = "http://image.tmdb.org/t/p/"
 const val IMAGE_PATH_URL = "https://image.tmdb.org/t/p/w500"
+const val BASE_URL = "https://api.themoviedb.org/3/"
+const val POPULAR_MOVIES_API = "movie/popular"
+const val API_KEY = "cbb2c4d1c8fdae3b9bbbef9250fdd002"
+const val TRENDING_MOVIES_API = "trending/all/day"
+const val TOP_RATED_MOVIES_API = "movie/top_rated"
