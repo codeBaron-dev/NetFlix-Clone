@@ -57,14 +57,14 @@ fun HomeScreen(filmsViewModel: FilmsViewModel = hiltViewModel()) {
         BottomSheetState(BottomSheetValue.Collapsed)
     )
     val coroutineScope = rememberCoroutineScope()
-
+    val randomData = trendingResultDummy.random()
     BottomSheetScaffold(
         scaffoldState = bottomSheetScaffoldState,
         sheetContent = {
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
+                    .height(250.dp)
                     .background(color = Color.DarkGray)
             ) {
                 Column(
@@ -77,7 +77,7 @@ fun HomeScreen(filmsViewModel: FilmsViewModel = hiltViewModel()) {
                         Image(
                             modifier = Modifier
                                 .width(120.dp)
-                                .height(200.dp)
+                                .height(150.dp)
                                 .clip(RoundedCornerShape(5.dp)),
                             painter = rememberAsyncImagePainter(
                                 ImageRequest.Builder(LocalContext.current)
@@ -94,33 +94,43 @@ fun HomeScreen(filmsViewModel: FilmsViewModel = hiltViewModel()) {
                         Column(
                             Modifier.padding(8.dp)
                         ) {
-                            Text(
-                                text = "selectedVideo.original_title",
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Justify,
-                                maxLines = 2,
-                                color = Color.White,
-                                fontSize = 25.sp
-                            )
-                            Text(
-                                text = "selectedVideo.release_date",
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Light,
-                                textAlign = TextAlign.Justify,
-                                maxLines = 1,
-                                color = Color.White
-                            )
-                            Text(
-                                text = "selectedVideo.overview",
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Justify,
-                                maxLines = 4,
-                                color = Color.White
-                            )
+                            randomData.original_title?.let {
+                                Text(
+                                    text = it,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Justify,
+                                    maxLines = 2,
+                                    color = Color.White,
+                                    fontSize = 25.sp
+                                )
+                            }
+                            randomData.release_date?.let {
+                                Text(
+                                    text = it,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Light,
+                                    textAlign = TextAlign.Justify,
+                                    maxLines = 1,
+                                    color = Color.White,
+                                    fontSize = 11.sp
+                                )
+                            }
+                            randomData.overview?.let {
+                                Text(
+                                    text = it,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Justify,
+                                    maxLines = 4,
+                                    color = Color.White
+                                )
+                            }
                         }
                     }
+
+                    Spacer(modifier = Modifier.size(5.dp))
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -129,29 +139,46 @@ fun HomeScreen(filmsViewModel: FilmsViewModel = hiltViewModel()) {
                         Icon(
                             imageVector = Icons.Default.PlayCircle,
                             contentDescription = ADD_IMAGE_DESCRIPTION,
-                            tint = Color.White
+                            tint = Color.White,
+                            modifier = Modifier
+                                .height(30.dp)
+                                .width(50.dp)
                         )
                         Icon(
                             imageVector = Icons.Default.DownloadForOffline,
                             contentDescription = null,
-                            tint = Color.White
+                            tint = Color.White,
+                            modifier = Modifier
+                                .height(30.dp)
+                                .width(50.dp)
                         )
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            tint = Color.White
+                            tint = Color.White,
+                            modifier = Modifier
+                                .height(30.dp)
+                                .width(50.dp)
                         )
                         Icon(
                             imageVector = Icons.Default.Share,
                             contentDescription = null,
-                            tint = Color.White
+                            tint = Color.White,
+                            modifier = Modifier
+                                .height(30.dp)
+                                .width(50.dp)
                         )
                     }
+                    Spacer(modifier = Modifier.size(5.dp))
                     Box(
                         modifier = Modifier
-                            .height(4.dp)
+                            .height(1.dp)
+                            .fillMaxWidth()
                             .background(color = Color.White)
                     )
+
+                    Spacer(modifier = Modifier.size(10.dp))
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -169,6 +196,7 @@ fun HomeScreen(filmsViewModel: FilmsViewModel = hiltViewModel()) {
                                     contentDescription = null,
                                     tint = Color.White
                                 )
+                                Spacer(modifier = Modifier.size(5.dp))
                                 Text(
                                     text = EPISODES_INFO,
                                     fontFamily = FontFamily.Monospace,
@@ -220,6 +248,7 @@ fun HomeScreen(filmsViewModel: FilmsViewModel = hiltViewModel()) {
     }
 }
 
+@Preview(showBackground = true)
 @Composable
 fun HeaderBar() {
     BoxWithConstraints(
@@ -233,8 +262,8 @@ fun HeaderBar() {
                 .fillMaxWidth()
                 .drawWithCache {
                     val gradient = Brush.verticalGradient(
-                        colors = listOf(Color.Gray, Color.Transparent),
-                        startY = size.height / 15,
+                        colors = listOf(Color.Black, Color.Transparent),
+                        startY = size.height / 19,
                         endY = size.height
                     )
                     onDrawWithContent {
@@ -542,15 +571,7 @@ fun ContinueWatchingList(
                                     tint = Color.White,
                                     modifier = Modifier
                                         .size(70.dp)
-                                        .clickable {
-                                            coroutineScope.launch {
-                                                if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
-                                                    bottomSheetScaffoldState.bottomSheetState.expand()
-                                                } else {
-                                                    bottomSheetScaffoldState.bottomSheetState.collapse()
-                                                }
-                                            }
-                                        }
+                                        .clickable { }
                                 )
                             }
                             Column(
@@ -597,7 +618,15 @@ fun ContinueWatchingList(
                                             imageVector = Icons.Outlined.Info,
                                             contentDescription = INFO,
                                             tint = Color.White,
-                                            modifier = Modifier.clickable { }
+                                            modifier = Modifier.clickable {
+                                                coroutineScope.launch {
+                                                    if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
+                                                        bottomSheetScaffoldState.bottomSheetState.expand()
+                                                    } else {
+                                                        bottomSheetScaffoldState.bottomSheetState.collapse()
+                                                    }
+                                                }
+                                            }
                                         )
                                         Spacer(modifier = Modifier.size(45.dp))
                                         Icon(
