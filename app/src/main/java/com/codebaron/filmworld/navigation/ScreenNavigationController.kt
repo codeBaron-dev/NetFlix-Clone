@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.codebaron.filmworld.screens.HomeScreen
+import com.codebaron.filmworld.screens.FilmsRequestHandler
 import com.codebaron.filmworld.screens.OptionScreen
 import com.codebaron.filmworld.screens.SplashScreen
 
@@ -22,7 +22,7 @@ fun IntroStageNavigationController() {
             OptionScreen(navigationController)
         }
         composable(Destinations.MOVIES_HOME_SCREEN.name) {
-            HomeScreen()
+            FilmsRequestHandler()
         }
     }
 }

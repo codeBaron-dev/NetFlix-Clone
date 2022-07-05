@@ -40,18 +40,40 @@ import com.codebaron.filmworld.R
 import com.codebaron.filmworld.models.Result
 import com.codebaron.filmworld.models.trendingResultDummy
 import com.codebaron.filmworld.repository.FilmsViewModel
+import com.codebaron.filmworld.ui.theme.FilmWorldTheme
 import com.codebaron.filmworld.utils.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Preview(showBackground = true)
 @Composable
-fun HomeScreen(filmsViewModel: FilmsViewModel = hiltViewModel()) {
-    val popularFilms by filmsViewModel.getPopularFilms(API_KEY, "en-US", "1")
-        .observeAsState(emptyList())
-    val trendingFilms by filmsViewModel.getTrendingFilms(API_KEY).observeAsState(emptyList())
-    val topRatedFilms by filmsViewModel.getTopRatedFilms(API_KEY, "en-US", "1")
-        .observeAsState(emptyList())
+fun FilmsRequestHandler(filmsViewModel: FilmsViewModel = hiltViewModel()) {
+    val localContext = LocalContext.current
+    if (isNetworkAvailable(localContext)) {
+        // observe films state
+        val popularFilms by filmsViewModel.getPopularFilms(API_KEY, "en-US", "1")
+            .observeAsState(emptyList())
+        val trendingFilms by filmsViewModel.getTrendingFilms(API_KEY).observeAsState(emptyList())
+        val topRatedFilms by filmsViewModel.getTopRatedFilms(API_KEY, "en-US", "1")
+            .observeAsState(emptyList())
+        HomeScreen(popularFilms, trendingFilms, topRatedFilms)
+    } else {
+        HomeScreen(trendingResultDummy, trendingResultDummy, trendingResultDummy)
+        CustomMaterialDialog(
+            "Internet Connection Error",
+            "No internet connection, currently displaying old films data, reconnect to internet to get updated contents",
+            "Confirm",
+            "Dismiss"
+        )
+    }
+}
+
+@Composable
+fun HomeScreen(
+    popularFilmsList: List<Result>,
+    trendingFilmsList: List<Result>,
+    topRatedFilmsList: List<Result>
+) {
+    //bottom sheet
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState =
         BottomSheetState(BottomSheetValue.Collapsed)
@@ -223,6 +245,7 @@ fun HomeScreen(filmsViewModel: FilmsViewModel = hiltViewModel()) {
                 }
             }
         },
+        sheetShape = RoundedCornerShape(10.dp),
         sheetPeekHeight = 0.dp
     ) {
         Box(
@@ -233,9 +256,9 @@ fun HomeScreen(filmsViewModel: FilmsViewModel = hiltViewModel()) {
                 .background(color = Color.Black)
         ) {
             Column {
-                val popularFilmContent = popularFilms.ifEmpty { trendingResultDummy }
-                val trendingFilmContent = trendingFilms.ifEmpty { trendingResultDummy }
-                val topRatedFilmContent = topRatedFilms.ifEmpty { trendingResultDummy }
+                val popularFilmContent = popularFilmsList.ifEmpty { trendingResultDummy }
+                val trendingFilmContent = trendingFilmsList.ifEmpty { trendingResultDummy }
+                val topRatedFilmContent = topRatedFilmsList.ifEmpty { trendingResultDummy }
                 MovieHeaderView(
                     popularFilmsList = popularFilmContent,
                     trendingFilmsList = trendingFilmContent,
@@ -752,5 +775,13 @@ fun TopRated(videos: List<Result>) {
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MoviePreview() {
+    FilmWorldTheme {
+        FilmsRequestHandler()
     }
 }
