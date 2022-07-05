@@ -37,8 +37,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.codebaron.filmworld.R
-import com.codebaron.filmworld.models.Result
-import com.codebaron.filmworld.models.trendingResultDummy
+import com.codebaron.filmworld.models.filmsdata.Result
+import com.codebaron.filmworld.models.filmsdata.trendingResultDummy
 import com.codebaron.filmworld.repository.FilmsViewModel
 import com.codebaron.filmworld.ui.theme.FilmWorldTheme
 import com.codebaron.filmworld.utils.*
@@ -380,8 +380,8 @@ fun MovieHeaderView(
     popularFilmsList: List<Result>,
     trendingFilmsList: List<Result>,
     topRatedFilmsList: List<Result>,
-    coroutineScope: CoroutineScope,
-    bottomSheetScaffoldState: BottomSheetScaffoldState
+    coroutineScope: CoroutineScope?,
+    bottomSheetScaffoldState: BottomSheetScaffoldState?
 ) {
 
     val getRandomVideoObject = popularFilmsList.random()
@@ -450,7 +450,6 @@ fun MovieHeaderView(
                                     text = it,
                                     fontFamily = FontFamily.Monospace,
                                     fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Justify,
                                     maxLines = 1,
                                     color = Color.White
                                 )
@@ -524,7 +523,9 @@ fun MovieHeaderView(
             }
         }
         Spacer(modifier = Modifier.size(10.dp))
-        ContinueWatchingList(popularFilmsList, coroutineScope, bottomSheetScaffoldState)
+        //ContinueWatchingList(popularFilmsList, coroutineScope!!, bottomSheetScaffoldState!!)
+        //Spacer(modifier = Modifier.size(1.dp))
+        PopularMoviesList(popularFilmsList)
         Spacer(modifier = Modifier.size(1.dp))
         TrendingNowList(trendingFilmsList)
         Spacer(modifier = Modifier.size(1.dp))
@@ -669,6 +670,61 @@ fun ContinueWatchingList(
 }
 
 @Composable
+fun PopularMoviesList(videos: List<Result>) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = POPULAR_NOW,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Justify,
+            maxLines = 1,
+            color = Color.White
+        )
+        LazyRow {
+            items(videos) { content ->
+                Card(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                        .clickable {}
+                ) {
+                    Column {
+                        BoxWithConstraints(
+                            modifier = Modifier
+                                .width(120.dp)
+                                .height(170.dp)
+                        ) {
+                            Box {
+                                Image(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .fillMaxWidth(),
+                                    painter = rememberAsyncImagePainter(
+                                        ImageRequest.Builder(LocalContext.current)
+                                            .data(data = "$IMAGE_PATH_URL/${content.poster_path}")
+                                            .apply(block = fun ImageRequest.Builder.() {
+                                                placeholder(IMAGES.random())
+                                                error(IMAGES.random())
+                                            }).build()
+                                    ),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun TrendingNowList(videos: List<Result>) {
     Column(
         modifier = Modifier
@@ -782,6 +838,12 @@ fun TopRated(videos: List<Result>) {
 @Composable
 fun MoviePreview() {
     FilmWorldTheme {
-        FilmsRequestHandler()
+        MovieHeaderView(
+            trendingResultDummy,
+            trendingResultDummy,
+            trendingResultDummy,
+            null,
+            null
+        )
     }
 }

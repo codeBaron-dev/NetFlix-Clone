@@ -1,5 +1,6 @@
 package com.codebaron.filmworld.utils
 
+import androidx.compose.ui.graphics.Color
 import com.codebaron.filmworld.R
 import com.codebaron.filmworld.navigation.BottomNavigationItems.*
 
@@ -16,6 +17,7 @@ const val TRENDING_NOW = "Trending Now"
 const val SEARCH = "Search"
 const val TOP_RATED = "Top Rated"
 const val EPISODES_INFO = "Episode & Info"
+const val POPULAR_NOW = "Popular Now"
 
 
 //
@@ -32,6 +34,7 @@ val SEASONS = listOf("S1", "S2", "S3", "S4", "S5")
 val EPISODES = listOf("E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9", "E10")
 val PROGRESS_LEVELS = listOf(0.0f, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f)
 val IMAGES = listOf(R.drawable.anime, R.drawable.dummyimage, R.drawable.netflix)
+val RANDOM_COLORS = listOf(Color.Red, Color.Green, Color.Yellow, Color.Blue)
 
 
 val NAVIGATION_OBJECTS = listOf(
@@ -46,5 +49,5 @@ const val IMAGE_PATH_URL = "https://image.tmdb.org/t/p/w500"
 const val BASE_URL = "https://api.themoviedb.org/3/"
 const val POPULAR_MOVIES_API = "movie/popular"
 const val API_KEY = "cbb2c4d1c8fdae3b9bbbef9250fdd002"
-const val TRENDING_MOVIES_API = "trending/all/day"
+const val TRENDING_MOVIES_API = "trending/all/week"
 const val TOP_RATED_MOVIES_API = "movie/top_rated"

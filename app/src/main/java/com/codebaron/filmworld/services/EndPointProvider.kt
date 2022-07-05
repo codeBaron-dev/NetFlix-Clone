@@ -1,6 +1,6 @@
 package com.codebaron.filmworld.services
 
-import com.codebaron.filmworld.models.TrendingMovies
+import com.codebaron.filmworld.models.filmsdata.TrendingMovies
 import com.codebaron.filmworld.utils.POPULAR_MOVIES_API
 import com.codebaron.filmworld.utils.TOP_RATED_MOVIES_API
 import com.codebaron.filmworld.utils.TRENDING_MOVIES_API

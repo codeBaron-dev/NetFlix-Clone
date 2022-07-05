@@ -1,6 +1,6 @@
 package com.codebaron.filmworld.repository
 
-import com.codebaron.filmworld.models.Result
+import com.codebaron.filmworld.models.filmsdata.Result
 import com.codebaron.filmworld.services.EndPointProvider
 import javax.inject.Inject
 

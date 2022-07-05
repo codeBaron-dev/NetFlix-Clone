@@ -1,6 +1,6 @@
 package com.codebaron.filmworld.repository
 
-import com.codebaron.filmworld.models.Result
+import com.codebaron.filmworld.models.filmsdata.Result
 
 interface FilmsRepository {
     suspend fun getPopularFilms(apiKey: String, language: String, page: String): List<Result>?

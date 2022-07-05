@@ -1,4 +1,4 @@
-package com.codebaron.filmworld.models
+package com.codebaron.filmworld.models.filmsdata
 
 data class TrendingMovies(
     val page: Int? = null,

@@ -2,6 +2,7 @@
 
 package com.codebaron.filmworld.utils
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.net.ConnectivityManager
@@ -16,6 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 //check for network connectivity and return a boolean
@@ -108,4 +111,11 @@ fun CustomMaterialDialog(
             backgroundColor = Color.Black
         )
     }
+}
+
+@SuppressLint("SimpleDateFormat")
+fun convertISOTimeToDate(isoTime: String): String? {
+    val sdf = SimpleDateFormat("yyyy-MM-dd")
+    val convertedDate: Date? = sdf.parse(isoTime)
+    return SimpleDateFormat("MMMMM dd,yyyy").format(convertedDate)
 }
