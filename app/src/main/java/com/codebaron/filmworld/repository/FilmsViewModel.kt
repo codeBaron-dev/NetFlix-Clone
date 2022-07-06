@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.codebaron.filmworld.models.filmcredits.FilmCasts
+import com.codebaron.filmworld.models.filmdetails.FilmDetailsData
 import com.codebaron.filmworld.models.filmsdata.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +18,8 @@ class FilmsViewModel @Inject constructor(private val filmsRepository: FilmsRepos
     private val _popularFilms = MutableLiveData<List<Result>>()
     private val _trendingFilms = MutableLiveData<List<Result>>()
     private val _topRatedFilms = MutableLiveData<List<Result>>()
+    private val _filmDetails = MutableLiveData<FilmDetailsData>()
+    private val _filmCasts = MutableLiveData<FilmCasts>()
 
     fun getPopularFilms(apiKey: String, language: String, page: String): LiveData<List<Result>> {
         viewModelScope.launch(Dispatchers.IO) {
@@ -39,5 +43,21 @@ class FilmsViewModel @Inject constructor(private val filmsRepository: FilmsRepos
             _topRatedFilms.postValue(films)
         }
         return _topRatedFilms
+    }
+
+    fun getFilmDetails(apiKey: String, language: String, movieId: String): LiveData<FilmDetailsData> {
+        viewModelScope.launch {
+            val filmDetails = filmsRepository.getFilmDetails(apiKey, language, movieId)
+            _filmDetails.postValue(filmDetails)
+        }
+        return _filmDetails
+    }
+
+    fun getFilmCast(apiKey: String, language: String, movieId: String): LiveData<FilmCasts> {
+        viewModelScope.launch {
+            val filmCasts = filmsRepository.getFilmCredits(apiKey, language, movieId)
+            _filmCasts.postValue(filmCasts)
+        }
+        return _filmCasts
     }
 }

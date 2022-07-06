@@ -1,12 +1,17 @@
 package com.codebaron.filmworld.repository
 
+import com.codebaron.filmworld.models.filmcredits.FilmCasts
+import com.codebaron.filmworld.models.filmdetails.FilmDetailsData
 import com.codebaron.filmworld.models.filmsdata.Result
 import com.codebaron.filmworld.services.EndPointProvider
 import javax.inject.Inject
 
-class FilmsRepositoryImplementation @Inject constructor(private val endPointProvider: EndPointProvider): FilmsRepository {
+class FilmsRepositoryImplementation @Inject constructor(private val endPointProvider: EndPointProvider) :
+    FilmsRepository {
 
     private var films: List<Result>? = emptyList()
+    private var filmDetails: FilmDetailsData? = null
+    private var filmCasts: FilmCasts? = null
 
     override suspend fun getPopularFilms(
         apiKey: String,
@@ -22,7 +27,8 @@ class FilmsRepositoryImplementation @Inject constructor(private val endPointProv
     }
 
     override suspend fun getTrendingFilms(apiKey: String): List<Result>? {
-        val apiResponse = endPointProvider.getTrendingMovies(apiKey)
+        val apiResponse =
+            endPointProvider.getTrendingMovies("all", "week", apiKey)
         if (apiResponse.isSuccessful) {
             val filmsData: List<Result>? = apiResponse.body()?.results
             films = filmsData ?: emptyList()
@@ -41,5 +47,31 @@ class FilmsRepositoryImplementation @Inject constructor(private val endPointProv
             films = filmsData ?: emptyList()
         }
         return films
+    }
+
+    override suspend fun getFilmDetails(
+        apiKey: String,
+        language: String,
+        movieId: String
+    ): FilmDetailsData? {
+        val apiResponse = endPointProvider.getMovieDetails(movieId, apiKey, language)
+        if (apiResponse.isSuccessful) {
+            val filmData: FilmDetailsData? = apiResponse.body()
+            filmDetails = filmData
+        }
+        return filmDetails
+    }
+
+    override suspend fun getFilmCredits(
+        apiKey: String,
+        language: String,
+        movieId: String
+    ): FilmCasts? {
+        val apiResponse = endPointProvider.getMovieCredits(movieId, apiKey, language)
+        if (apiResponse.isSuccessful) {
+            val filmCredits: FilmCasts? = apiResponse.body()
+            filmCasts = filmCredits
+        }
+        return filmCasts
     }
 }

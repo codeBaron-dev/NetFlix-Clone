@@ -11,12 +11,16 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DownloadForOffline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.StarRate
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -31,25 +35,32 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.codebaron.filmworld.R
+import com.codebaron.filmworld.models.filmcredits.FilmCasts
+import com.codebaron.filmworld.models.filmcredits.dummyFilmCasts
+import com.codebaron.filmworld.models.filmdetails.FilmDetailsData
 import com.codebaron.filmworld.models.filmdetails.dummyFilmDetailsData
 import com.codebaron.filmworld.models.filmdetails.dummyGenre
-import com.codebaron.filmworld.utils.ADD_IMAGE_DESCRIPTION
-import com.codebaron.filmworld.utils.MOVIE_INFO
-import com.codebaron.filmworld.utils.PLAY
-import com.codebaron.filmworld.utils.PLAY_BUTTON_DESCRIPTION
+import com.codebaron.filmworld.repository.FilmsViewModel
+import com.codebaron.filmworld.ui.theme.FilmWorldTheme
+import com.codebaron.filmworld.utils.*
 
 @Composable
-fun FilmDetailsRequestHandler() {
-    Text(text = "Games Screen")
+fun FilmDetailsRequestHandler(movieId: String, filmsViewModel: FilmsViewModel = hiltViewModel()) {
+    val localContext = LocalContext.current
+    if (isNetworkAvailable(localContext)) {
+        val filmDetails by filmsViewModel.getFilmDetails(API_KEY, "en-US", movieId).observeAsState()
+        val filmCasts by filmsViewModel.getFilmCast(API_KEY, "en-US", movieId).observeAsState()
+        FilmDetailsScreen(filmDetails, filmCasts)
+    }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun FilmDetailsScreen() {
-    val dummyData = dummyFilmDetailsData
+fun FilmDetailsScreen(filmDetails: FilmDetailsData?, filmCasts: FilmCasts?) {
+    val movieCrew = remember { mutableListOf(filmCasts?.crew)}
     Scaffold {
         BoxWithConstraints(
             modifier = Modifier
@@ -57,197 +68,61 @@ fun FilmDetailsScreen() {
                 .fillMaxHeight()
                 .background(color = Color.Black)
         ) {
-            Image(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth()
-                    .drawWithCache {
-                        val gradient = Brush.verticalGradient(
-                            colors = listOf(Color.Gray, Color.Black),
-                            startY = size.height / 90,
-                            endY = size.height
-                        )
-                        onDrawWithContent {
-                            drawContent()
-                            drawRect(gradient, blendMode = BlendMode.Multiply)
-                        }
-                    },
-                painter = rememberAsyncImagePainter(
-                    ImageRequest.Builder(LocalContext.current)
-                        .data(data = "")
-                        .apply(block = fun ImageRequest.Builder.() {
-                            placeholder(R.drawable.dummyimage)
-                            error(R.drawable.anime)
-                        }).build()
-                ),
-                contentDescription = null,
-                contentScale = ContentScale.Crop
-            )
-
-            BoxWithConstraints(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(400.dp)
-                    .background(color = Color.Black)
-            ) {
-                Box(modifier = Modifier.background(Color.Black)) {
-                    Image(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight()
-                            .drawWithCache {
-                                val gradient = Brush.verticalGradient(
-                                    colors = listOf(Color.Transparent, Color.Black),
-                                    startY = size.height / 20,
-                                    endY = size.height
-                                )
-                                onDrawWithContent {
-                                    drawContent()
-                                    drawRect(gradient, blendMode = BlendMode.Multiply)
-                                }
-                            },
-                        painter = rememberAsyncImagePainter(
-                            ImageRequest.Builder(LocalContext.current)
-                                .data(data = "")
-                                .apply(block = fun ImageRequest.Builder.() {
-                                    placeholder(R.drawable.dummyimage)
-                                    error(R.drawable.anime)
-                                }).build()
-                        ), contentDescription = null,
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                Column(
+            Column {
+                BoxWithConstraints(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(600.dp)
+                        .background(color = Color.Black)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(5.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalArrangement = Arrangement.Center
-                            ) {
+                    Box(modifier = Modifier.background(Color.Black)) {
+                        Column {
+                            Image(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(250.dp)
+                                    .drawWithCache {
+                                        val gradient = Brush.verticalGradient(
+                                            colors = listOf(Color.Transparent, Color.Black),
+                                            startY = size.height / 30,
+                                            endY = size.height
+                                        )
+                                        onDrawWithContent {
+                                            drawContent()
+                                            drawRect(gradient, blendMode = BlendMode.Multiply)
+                                        }
+                                    },
+                                painter = rememberAsyncImagePainter(
+                                    ImageRequest.Builder(LocalContext.current)
+                                        .data(data = "$IMAGE_PATH_URL/${filmDetails?.backdrop_path}")
+                                        .apply(block = fun ImageRequest.Builder.() {
+                                            placeholder(R.drawable.dummyimage)
+                                            error(R.drawable.anime)
+                                        }).build()
+                                ), contentDescription = null,
+                                contentScale = ContentScale.FillBounds
+                            )
+                            Column(modifier = Modifier.padding(5.dp)) {
                                 Text(
-                                    text = dummyData.title,
+                                    text = filmDetails?.title.toString(),
                                     fontFamily = FontFamily.Monospace,
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 2,
                                     color = Color.White,
-                                    fontSize = 20.sp
+                                    fontSize = 25.sp
                                 )
-                                Spacer(modifier = Modifier.size(5.dp))
-                                Row {
-                                    Text(
-                                        text = "Tagline: ",
-                                        fontFamily = FontFamily.Monospace,
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 2,
-                                        color = Color.White,
-                                        fontSize = 11.sp
-                                    )
-                                    Text(
-                                        text = dummyData.tagline,
-                                        fontFamily = FontFamily.Monospace,
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 2,
-                                        color = Color.White,
-                                        fontSize = 11.sp
-                                    )
-                                }
-                                Spacer(modifier = Modifier.size(5.dp))
-                                Row {
-                                    /*Text(
-                                        text = "Overview: ",
-                                        fontFamily = FontFamily.Monospace,
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 2,
-                                        color = Color.White,
-                                        fontSize = 11.sp
-                                    )*/
-                                    Text(
-                                        text = dummyData.overview,
-                                        fontFamily = FontFamily.Monospace,
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 4,
-                                        color = Color.White,
-                                        fontSize = 11.sp
-                                    )
-                                }
-                                Spacer(modifier = Modifier.size(5.dp))
-                                Row {
-                                    Text(
-                                        text = "Genre:",
-                                        fontFamily = FontFamily.Monospace,
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 2,
-                                        color = Color.White,
-                                        fontSize = 11.sp
-                                    )
-                                    Spacer(modifier = Modifier.size(5.dp))
-                                    LazyRow {
-                                        items(dummyGenre) { genre ->
-                                            Text(
-                                                text = genre.name,
-                                                fontFamily = FontFamily.Monospace,
-                                                fontWeight = FontWeight.Bold,
-                                                maxLines = 2,
-                                                color = Color.White,
-                                                fontSize = 11.sp
-                                            )
-                                        }
-                                    }
-                                }
-                                Row {
-                                    Text(
-                                        text = "Status: ",
-                                        fontFamily = FontFamily.Monospace,
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 2,
-                                        color = Color.White,
-                                        fontSize = 11.sp
-                                    )
-                                    Text(
-                                        text = "${dummyData.status} on ${dummyData.release_date}",
-                                        fontFamily = FontFamily.Monospace,
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 2,
-                                        color = Color.White,
-                                        fontSize = 11.sp
-                                    )
-                                }
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(
-                                        imageVector = Icons.Default.Favorite,
-                                        contentDescription = ADD_IMAGE_DESCRIPTION,
-                                        tint = Color.White
-                                    )
-                                }
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(
-                                        imageVector = Icons.Default.List,
-                                        contentDescription = ADD_IMAGE_DESCRIPTION,
-                                        tint = Color.White
-                                    )
-                                }
+                                Text(
+                                    text = "${filmDetails?.status} on ${filmDetails?.release_date}",
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.ExtraLight,
+                                    maxLines = 2,
+                                    color = Color.White,
+                                    fontSize = 14.sp
+                                )
                                 Card(
                                     modifier = Modifier
-                                        .width(110.dp)
-                                        .height(60.dp)
-                                        .padding(15.dp)
+                                        .fillMaxWidth()
+                                        .height(50.dp)
                                         .clickable { }
                                 ) {
                                     Row(
@@ -260,6 +135,7 @@ fun FilmDetailsScreen() {
                                             contentDescription = PLAY_BUTTON_DESCRIPTION,
                                             tint = Color.Black
                                         )
+                                        Spacer(modifier = Modifier.size(5.dp))
                                         Text(
                                             text = PLAY,
                                             fontFamily = FontFamily.Monospace,
@@ -270,19 +146,156 @@ fun FilmDetailsScreen() {
                                         )
                                     }
                                 }
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Bookmark,
-                                        contentDescription = MOVIE_INFO,
-                                        tint = Color.White
-                                    )
+                                Spacer(modifier = Modifier.size(5.dp))
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(50.dp)
+                                        .clickable { },
+                                    backgroundColor = Color.DarkGray
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.DownloadForOffline,
+                                            contentDescription = PLAY_BUTTON_DESCRIPTION,
+                                            tint = Color.White
+                                        )
+                                        Spacer(modifier = Modifier.size(5.dp))
+                                        Text(
+                                            text = "Download",
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Justify,
+                                            maxLines = 1,
+                                            color = Color.White
+                                        )
+                                    }
                                 }
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.StarRate,
-                                        contentDescription = MOVIE_INFO,
-                                        tint = Color.White
+                                Spacer(modifier = Modifier.size(5.dp))
+                                Text(
+                                    text = filmDetails?.overview.toString(),
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Light,
+                                    maxLines = 4,
+                                    color = Color.White,
+                                    fontSize = 14.sp
+                                )
+                                Spacer(modifier = Modifier.size(5.dp))
+                                Row {
+                                    Text(
+                                        text = "Genre:",
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.ExtraLight,
+                                        maxLines = 2,
+                                        color = Color.White,
+                                        fontSize = 14.sp,
+                                        modifier = Modifier.padding(5.dp)
                                     )
+                                    Spacer(modifier = Modifier.size(5.dp))
+                                    LazyRow {
+                                        items(dummyGenre) { genre ->
+                                            Text(
+                                                text = genre.name,
+                                                fontFamily = FontFamily.Monospace,
+                                                fontWeight = FontWeight.ExtraLight,
+                                                maxLines = 2,
+                                                color = Color.White,
+                                                fontSize = 14.sp,
+                                                modifier = Modifier.padding(5.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                                Spacer(modifier = Modifier.size(5.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center,
+                                        modifier = Modifier.width(50.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Favorite,
+                                            contentDescription = ADD_IMAGE_DESCRIPTION,
+                                            tint = Color.White
+                                        )
+                                        Text(
+                                            text = "Mark As Liked",
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = FontWeight.ExtraLight,
+                                            maxLines = 2,
+                                            color = Color.White,
+                                            fontSize = 11.sp,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center,
+                                        modifier = Modifier.width(50.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.List,
+                                            contentDescription = ADD_IMAGE_DESCRIPTION,
+                                            tint = Color.White
+                                        )
+                                        Text(
+                                            text = "Add To List",
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = FontWeight.ExtraLight,
+                                            maxLines = 2,
+                                            color = Color.White,
+                                            fontSize = 11.sp,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center,
+                                        modifier = Modifier.width(50.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Bookmark,
+                                            contentDescription = MOVIE_INFO,
+                                            tint = Color.White
+                                        )
+                                        Text(
+                                            text = "Add To Watchlist",
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = FontWeight.ExtraLight,
+                                            maxLines = 2,
+                                            color = Color.White,
+                                            fontSize = 11.sp,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center,
+                                        modifier = Modifier.width(50.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.StarRate,
+                                            contentDescription = MOVIE_INFO,
+                                            tint = Color.White
+                                        )
+                                        Text(
+                                            text = "Rate Movie",
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = FontWeight.ExtraLight,
+                                            maxLines = 2,
+                                            color = Color.White,
+                                            fontSize = 11.sp,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -290,5 +303,13 @@ fun FilmDetailsScreen() {
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DetailsDisplay() {
+    FilmWorldTheme {
+        FilmDetailsScreen(dummyFilmDetailsData, dummyFilmCasts)
     }
 }

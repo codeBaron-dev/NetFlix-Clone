@@ -2,6 +2,7 @@
 
 package com.codebaron.filmworld.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -9,14 +10,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,37 +35,54 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.codebaron.filmworld.R
 import com.codebaron.filmworld.models.filmsdata.Result
 import com.codebaron.filmworld.models.filmsdata.trendingResultDummy
+import com.codebaron.filmworld.navigation.Destinations.MOVIE_DETAILS_SCREEN
 import com.codebaron.filmworld.repository.FilmsViewModel
 import com.codebaron.filmworld.ui.theme.FilmWorldTheme
 import com.codebaron.filmworld.utils.*
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
-fun FilmsRequestHandler(filmsViewModel: FilmsViewModel = hiltViewModel()) {
+fun FilmsRequestHandler(
+    navigationController: NavHostController,
+    filmsViewModel: FilmsViewModel = hiltViewModel()
+) {
     val localContext = LocalContext.current
+
     if (isNetworkAvailable(localContext)) {
         // observe films state
-        val popularFilms by filmsViewModel.getPopularFilms(API_KEY, "en-US", "1")
+        val popularFilms by filmsViewModel.getPopularFilms(API_KEY, LANGUAGE_TYPE, PAGE_PARAM)
             .observeAsState(emptyList())
         val trendingFilms by filmsViewModel.getTrendingFilms(API_KEY).observeAsState(emptyList())
-        val topRatedFilms by filmsViewModel.getTopRatedFilms(API_KEY, "en-US", "1")
+        val topRatedFilms by filmsViewModel.getTopRatedFilms(API_KEY, LANGUAGE_TYPE, PAGE_PARAM)
             .observeAsState(emptyList())
-        HomeScreen(popularFilms, trendingFilms, topRatedFilms)
+        LaunchedEffect(Unit) {
+            delay(3000)
+        }
+        HomeScreen(popularFilms, trendingFilms, topRatedFilms, navigationController)
     } else {
-        HomeScreen(trendingResultDummy, trendingResultDummy, trendingResultDummy)
+        HomeScreen(
+            trendingResultDummy,
+            trendingResultDummy,
+            trendingResultDummy,
+            navigationController
+        )
         CustomMaterialDialog(
-            "Internet Connection Error",
-            "No internet connection, currently displaying old films data, reconnect to internet to get updated contents",
-            "Confirm",
-            "Dismiss"
+            INTERNET_ERROR_TITLE,
+            INTERNET_ERROR_MESSAGE,
+            POSITIVE_BUTTON_TEXT,
+            NEGATIVE_BUTTON_TEXT
         )
     }
 }
@@ -71,183 +91,10 @@ fun FilmsRequestHandler(filmsViewModel: FilmsViewModel = hiltViewModel()) {
 fun HomeScreen(
     popularFilmsList: List<Result>,
     trendingFilmsList: List<Result>,
-    topRatedFilmsList: List<Result>
+    topRatedFilmsList: List<Result>,
+    navigationController: NavHostController
 ) {
-    //bottom sheet
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState =
-        BottomSheetState(BottomSheetValue.Collapsed)
-    )
-    val coroutineScope = rememberCoroutineScope()
-    val randomData = trendingResultDummy.random()
-    BottomSheetScaffold(
-        scaffoldState = bottomSheetScaffoldState,
-        sheetContent = {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(250.dp)
-                    .background(color = Color.DarkGray)
-            ) {
-                Column(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(8.dp),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Row {
-                        Image(
-                            modifier = Modifier
-                                .width(120.dp)
-                                .height(150.dp)
-                                .clip(RoundedCornerShape(5.dp)),
-                            painter = rememberAsyncImagePainter(
-                                ImageRequest.Builder(LocalContext.current)
-                                    .data(data = "")
-                                    .apply(block = fun ImageRequest.Builder.() {
-                                        placeholder(R.drawable.dummyimage)
-                                        error(R.drawable.anime)
-                                    }).build()
-                            ),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop
-                        )
-
-                        Column(
-                            Modifier.padding(8.dp)
-                        ) {
-                            randomData.original_title?.let {
-                                Text(
-                                    text = it,
-                                    fontFamily = FontFamily.Monospace,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Justify,
-                                    maxLines = 2,
-                                    color = Color.White,
-                                    fontSize = 25.sp
-                                )
-                            }
-                            randomData.release_date?.let {
-                                Text(
-                                    text = it,
-                                    fontFamily = FontFamily.Monospace,
-                                    fontWeight = FontWeight.Light,
-                                    textAlign = TextAlign.Justify,
-                                    maxLines = 1,
-                                    color = Color.White,
-                                    fontSize = 11.sp
-                                )
-                            }
-                            randomData.overview?.let {
-                                Text(
-                                    text = it,
-                                    fontFamily = FontFamily.Monospace,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Justify,
-                                    maxLines = 4,
-                                    color = Color.White
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.size(5.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PlayCircle,
-                            contentDescription = ADD_IMAGE_DESCRIPTION,
-                            tint = Color.White,
-                            modifier = Modifier
-                                .height(30.dp)
-                                .width(50.dp)
-                        )
-                        Icon(
-                            imageVector = Icons.Default.DownloadForOffline,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier
-                                .height(30.dp)
-                                .width(50.dp)
-                        )
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier
-                                .height(30.dp)
-                                .width(50.dp)
-                        )
-                        Icon(
-                            imageVector = Icons.Default.Share,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier
-                                .height(30.dp)
-                                .width(50.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.size(5.dp))
-                    Box(
-                        modifier = Modifier
-                            .height(1.dp)
-                            .fillMaxWidth()
-                            .background(color = Color.White)
-                    )
-
-                    Spacer(modifier = Modifier.size(10.dp))
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(color = Color.DarkGray),
-                        contentAlignment = Alignment.TopCenter
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row {
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = null,
-                                    tint = Color.White
-                                )
-                                Spacer(modifier = Modifier.size(5.dp))
-                                Text(
-                                    text = EPISODES_INFO,
-                                    fontFamily = FontFamily.Monospace,
-                                    fontWeight = FontWeight.Light,
-                                    textAlign = TextAlign.Justify,
-                                    maxLines = 1,
-                                    color = Color.White
-                                )
-                            }
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            contentAlignment = Alignment.TopEnd
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.KeyboardArrowRight,
-                                contentDescription = null,
-                                tint = Color.White
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        sheetShape = RoundedCornerShape(10.dp),
-        sheetPeekHeight = 0.dp
-    ) {
+    Scaffold {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -259,12 +106,12 @@ fun HomeScreen(
                 val popularFilmContent = popularFilmsList.ifEmpty { trendingResultDummy }
                 val trendingFilmContent = trendingFilmsList.ifEmpty { trendingResultDummy }
                 val topRatedFilmContent = topRatedFilmsList.ifEmpty { trendingResultDummy }
+
                 MovieHeaderView(
                     popularFilmsList = popularFilmContent,
                     trendingFilmsList = trendingFilmContent,
                     topRatedFilmsList = topRatedFilmContent,
-                    coroutineScope,
-                    bottomSheetScaffoldState
+                    navigationController = navigationController
                 )
             }
         }
@@ -380,11 +227,11 @@ fun MovieHeaderView(
     popularFilmsList: List<Result>,
     trendingFilmsList: List<Result>,
     topRatedFilmsList: List<Result>,
-    coroutineScope: CoroutineScope?,
-    bottomSheetScaffoldState: BottomSheetScaffoldState?
+    navigationController: NavHostController
 ) {
 
     val getRandomVideoObject = popularFilmsList.random()
+    val localContext = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -480,7 +327,15 @@ fun MovieHeaderView(
                                     .width(110.dp)
                                     .height(60.dp)
                                     .padding(15.dp)
-                                    .clickable { }
+                                    .clickable {
+                                        Toast
+                                            .makeText(
+                                                localContext,
+                                                INVALID_ACTION,
+                                                Toast.LENGTH_LONG
+                                            )
+                                            .show()
+                                    }
                             ) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -502,7 +357,32 @@ fun MovieHeaderView(
                                     )
                                 }
                             }
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.clickable {
+                                    val encodedUrl =
+                                        URLEncoder.encode(
+                                            getRandomVideoObject.id.toString(),
+                                            StandardCharsets.UTF_8.toString()
+                                        )
+                                    if (isNetworkAvailable(localContext)) {
+                                        if (encodedUrl.isNotEmpty()) {
+                                            navigationController.navigate("${MOVIE_DETAILS_SCREEN.name}/$encodedUrl")
+                                        } else {
+                                            Toast.makeText(
+                                                localContext,
+                                                UNKNOWN_ERROR,
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+                                    } else {
+                                        Toast.makeText(
+                                            localContext,
+                                            INTERNET_ERROR_TITLE,
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                }) {
                                 Icon(
                                     imageVector = Icons.Outlined.Info,
                                     contentDescription = MOVIE_INFO,
@@ -522,17 +402,19 @@ fun MovieHeaderView(
                 }
             }
         }
+
         Spacer(modifier = Modifier.size(10.dp))
-        //ContinueWatchingList(popularFilmsList, coroutineScope!!, bottomSheetScaffoldState!!)
-        //Spacer(modifier = Modifier.size(1.dp))
-        PopularMoviesList(popularFilmsList)
+        PopularMoviesList(popularFilmsList, navigationController)
+
         Spacer(modifier = Modifier.size(1.dp))
-        TrendingNowList(trendingFilmsList)
+        TrendingNowList(trendingFilmsList, navigationController)
+
         Spacer(modifier = Modifier.size(1.dp))
-        TopRated(topRatedFilmsList)
+        TopRated(topRatedFilmsList, navigationController)
     }
 }
 
+//currently not in use
 @Composable
 fun ContinueWatchingList(
     videos: List<Result>,
@@ -670,7 +552,10 @@ fun ContinueWatchingList(
 }
 
 @Composable
-fun PopularMoviesList(videos: List<Result>) {
+fun PopularMoviesList(videos: List<Result>, navigationController: NavHostController) {
+
+    val localContext = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -691,7 +576,30 @@ fun PopularMoviesList(videos: List<Result>) {
                     modifier = Modifier
                         .padding(4.dp)
                         .fillMaxWidth()
-                        .clickable {}
+                        .clickable {
+                            val encodedUrl =
+                                URLEncoder.encode(
+                                    content.id.toString(),
+                                    StandardCharsets.UTF_8.toString()
+                                )
+                            if (isNetworkAvailable(localContext)) {
+                                if (encodedUrl.isNotEmpty()) {
+                                    navigationController.navigate("${MOVIE_DETAILS_SCREEN.name}/$encodedUrl")
+                                } else {
+                                    Toast
+                                        .makeText(localContext, UNKNOWN_ERROR, Toast.LENGTH_LONG)
+                                        .show()
+                                }
+                            } else {
+                                Toast
+                                    .makeText(
+                                        localContext,
+                                        INTERNET_ERROR_TITLE,
+                                        Toast.LENGTH_LONG
+                                    )
+                                    .show()
+                            }
+                        }
                 ) {
                     Column {
                         BoxWithConstraints(
@@ -725,7 +633,10 @@ fun PopularMoviesList(videos: List<Result>) {
 }
 
 @Composable
-fun TrendingNowList(videos: List<Result>) {
+fun TrendingNowList(videos: List<Result>, navigationController: NavHostController) {
+
+    val localContext = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -746,7 +657,30 @@ fun TrendingNowList(videos: List<Result>) {
                     modifier = Modifier
                         .padding(4.dp)
                         .fillMaxWidth()
-                        .clickable {}
+                        .clickable {
+                            val encodedUrl =
+                                URLEncoder.encode(
+                                    content.id.toString(),
+                                    StandardCharsets.UTF_8.toString()
+                                )
+                            if (isNetworkAvailable(localContext)) {
+                                if (encodedUrl.isNotEmpty()) {
+                                    navigationController.navigate("${MOVIE_DETAILS_SCREEN.name}/$encodedUrl")
+                                } else {
+                                    Toast
+                                        .makeText(localContext, UNKNOWN_ERROR, Toast.LENGTH_LONG)
+                                        .show()
+                                }
+                            } else {
+                                Toast
+                                    .makeText(
+                                        localContext,
+                                        INTERNET_ERROR_TITLE,
+                                        Toast.LENGTH_LONG
+                                    )
+                                    .show()
+                            }
+                        }
                 ) {
                     Column {
                         BoxWithConstraints(
@@ -780,7 +714,10 @@ fun TrendingNowList(videos: List<Result>) {
 }
 
 @Composable
-fun TopRated(videos: List<Result>) {
+fun TopRated(videos: List<Result>, navigationController: NavHostController) {
+
+    val localContext = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -801,7 +738,30 @@ fun TopRated(videos: List<Result>) {
                     modifier = Modifier
                         .padding(4.dp)
                         .fillMaxWidth()
-                        .clickable {}
+                        .clickable {
+                            val encodedUrl =
+                                URLEncoder.encode(
+                                    content.id.toString(),
+                                    StandardCharsets.UTF_8.toString()
+                                )
+                            if (isNetworkAvailable(localContext)) {
+                                if (encodedUrl.isNotEmpty()) {
+                                    navigationController.navigate("${MOVIE_DETAILS_SCREEN.name}/$encodedUrl")
+                                } else {
+                                    Toast
+                                        .makeText(localContext, UNKNOWN_ERROR, Toast.LENGTH_LONG)
+                                        .show()
+                                }
+                            } else {
+                                Toast
+                                    .makeText(
+                                        localContext,
+                                        INTERNET_ERROR_TITLE,
+                                        Toast.LENGTH_LONG
+                                    )
+                                    .show()
+                            }
+                        }
                 ) {
                     Column {
                         BoxWithConstraints(
@@ -842,8 +802,7 @@ fun MoviePreview() {
             trendingResultDummy,
             trendingResultDummy,
             trendingResultDummy,
-            null,
-            null
+            rememberNavController()
         )
     }
 }
