@@ -20,6 +20,7 @@ class FilmsViewModel @Inject constructor(private val filmsRepository: FilmsRepos
     private val _topRatedFilms = MutableLiveData<List<Result>>()
     private val _filmDetails = MutableLiveData<FilmDetailsData>()
     private val _filmCasts = MutableLiveData<FilmCasts>()
+    private val _similarMovies = MutableLiveData<List<Result>>()
 
     fun getPopularFilms(apiKey: String, language: String, page: String): LiveData<List<Result>> {
         viewModelScope.launch(Dispatchers.IO) {
@@ -59,5 +60,13 @@ class FilmsViewModel @Inject constructor(private val filmsRepository: FilmsRepos
             _filmCasts.postValue(filmCasts)
         }
         return _filmCasts
+    }
+
+    fun getSimilarMovies(apiKey: String, language: String, movieId: String): LiveData<List<Result>> {
+        viewModelScope.launch {
+            val similarMovies = filmsRepository.getSimilarFilms(apiKey, language, movieId)
+            _similarMovies.postValue(similarMovies)
+        }
+        return _similarMovies
     }
 }

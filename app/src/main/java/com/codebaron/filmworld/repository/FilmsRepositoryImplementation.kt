@@ -74,4 +74,17 @@ class FilmsRepositoryImplementation @Inject constructor(private val endPointProv
         }
         return filmCasts
     }
+
+    override suspend fun getSimilarFilms(
+        apiKey: String,
+        language: String,
+        movieId: String
+    ): List<Result>? {
+        val apiResponse = endPointProvider.getSimilarMovies(movieId, apiKey, language)
+        if (apiResponse.isSuccessful) {
+            val similarMovies: List<Result>? = apiResponse.body()?.results
+            films = similarMovies
+        }
+        return films
+    }
 }

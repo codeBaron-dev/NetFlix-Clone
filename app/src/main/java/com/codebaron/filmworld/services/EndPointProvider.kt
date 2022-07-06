@@ -3,10 +3,7 @@ package com.codebaron.filmworld.services
 import com.codebaron.filmworld.models.filmcredits.FilmCasts
 import com.codebaron.filmworld.models.filmdetails.FilmDetailsData
 import com.codebaron.filmworld.models.filmsdata.TrendingMovies
-import com.codebaron.filmworld.utils.MOVIE_DETAILS
-import com.codebaron.filmworld.utils.POPULAR_MOVIES_API
-import com.codebaron.filmworld.utils.TOP_RATED_MOVIES_API
-import com.codebaron.filmworld.utils.TRENDING_MOVIES_API
+import com.codebaron.filmworld.utils.*
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -42,10 +39,17 @@ interface EndPointProvider {
         @Query("language", encoded = true) language: String
     ): Response<FilmDetailsData>
 
-    @GET(MOVIE_DETAILS)
+    @GET(MOVIE_CREDITS)
     suspend fun getMovieCredits(
         @Path("movie_id", encoded = true) movieId: String,
         @Query("api_key", encoded = true) apiKey: String,
         @Query("language", encoded = true) language: String
     ): Response<FilmCasts>
+
+    @GET(SIMILAR_MOVIES)
+    suspend fun getSimilarMovies(
+        @Path("movie_id", encoded = true) movieId: String,
+        @Query("api_key", encoded = true) apiKey: String,
+        @Query("language", encoded = true) language: String
+    ): Response<TrendingMovies>
 }

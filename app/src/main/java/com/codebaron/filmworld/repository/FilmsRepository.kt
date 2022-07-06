@@ -10,4 +10,5 @@ interface FilmsRepository {
     suspend fun getTopRatedFilms(apiKey: String, language: String, page: String): List<Result>?
     suspend fun getFilmDetails(apiKey: String, language: String, movieId: String): FilmDetailsData?
     suspend fun getFilmCredits(apiKey: String, language: String, movieId: String): FilmCasts?
+    suspend fun getSimilarFilms(apiKey: String, language: String, movieId: String): List<Result>?
 }

@@ -46,6 +46,7 @@ val IMAGES = listOf(R.drawable.anime, R.drawable.dummyimage, R.drawable.netflix)
 val RANDOM_COLORS = listOf(Color.Red, Color.Green, Color.Yellow, Color.Blue)
 val MEDIA_TYPE = listOf("all", "movie", "person", "tv")
 val TIME_WINDOW = listOf("day", "week")
+val MOVIE_WATCH_TIME = listOf("45min", "1hour", "53min", "1hour 2min", "30min", "44min")
 
 
 val NAVIGATION_OBJECTS = listOf(
@@ -64,3 +65,4 @@ const val TRENDING_MOVIES_API = "trending/{media_type}/{time_window}"
 const val TOP_RATED_MOVIES_API = "movie/top_rated"
 const val MOVIE_DETAILS = "movie/{movie_id}"
 const val MOVIE_CREDITS = "/movie/{movie_id}/credits"
+const val SIMILAR_MOVIES = "movie/{movie_id}/similar"
