@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterialApi::class)
-
 package com.codebaron.filmworld.utils
 
 import android.annotation.SuppressLint
@@ -7,7 +5,6 @@ import android.app.AlertDialog
 import android.content.Context
 import android.net.ConnectivityManager
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
